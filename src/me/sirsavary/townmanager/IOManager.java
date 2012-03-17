@@ -53,7 +53,7 @@ public class IOManager {
 					Log.info("Loading flatfile DB");
 					flatfileConfig.load(flatfileDB);
 				} catch (InvalidConfigurationException e) {
-					// TODO Auto-generated catch block
+					Log.severe("Failed to load flatfile DB!");
 					e.printStackTrace();
 				}
 			}
@@ -69,24 +69,10 @@ public class IOManager {
 		return false;	
 	}
 
-	public void AddPlayer(Player playerToAdd) {
+	public void AddTown(Town TownToAdd) {
 		if (dbType.equalsIgnoreCase("flatfile") == true)
 		{
-			Log.info("Checking to see if player is in DB");
-			String playerToAddName = playerToAdd.getName();
-			
-			if (flatfileConfig.get("Players." + playerToAddName) == null)
-			{		
-				Log.info("Adding player to DB");
 
-				try {
-					flatfileConfig.save(flatfileDB);
-					Log.info("Player added to DB");
-				} catch (IOException e) {
-					Log.severe("Failed to save file! Abort! Abort!");
-					e.printStackTrace();
-				}
-			}	
 		}
 		else if (dbType.equalsIgnoreCase("mysql") == true)
 		{
@@ -104,21 +90,10 @@ public class IOManager {
 		}
 	}
 	
-	public void RemovePlayer(Player playerToRemove) {
+	public void RemoveTown(Player TownToRemove) {
 		if (dbType.equalsIgnoreCase("flatfile") == true)
 		{
-			String playerToRemoveName = playerToRemove.getName();
 			
-			if (flatfileConfig.get("Players." + playerToRemoveName + ".Skills.Mining") != null)
-			{						
-				flatfileConfig.set("Players." + playerToRemoveName, null);			
-				try {
-					flatfileConfig.save(flatfileDB);
-				} catch (IOException e) {
-					Log.severe("Failed to save file! Abort! Abort!");
-					e.printStackTrace();
-				}
-			}	
 		}
 		else if (dbType.equalsIgnoreCase("mysql") == true)
 		{
@@ -136,6 +111,28 @@ public class IOManager {
 		}
 	}
 
+	public void EditTown(Town TownToEdit)
+	{
+		if (dbType.equalsIgnoreCase("flatfile") == true)
+		{
+			
+		}
+		else if (dbType.equalsIgnoreCase("mysql") == true)
+		{
+			Log.warning("MySQL database is unimplemented at this time! Please use Flatfile!");
+		}
+		else if (dbType.equalsIgnoreCase("sqlite") == true)
+		{
+			Log.warning("SQLite database is unimplemented at this time! Please use Flatfile!");
+		}
+		else
+		{
+			Log.severe("Config file contains unknown database type: " + dbType + "!");
+			Log.severe("Valid types are Flatfile, MySQL and SQLite!");
+			
+		}
+	}
+	
 	public Object getValue(String valueLocation) {
 		if (dbType.equalsIgnoreCase("flatfile") == true)
 		{
@@ -185,7 +182,7 @@ public class IOManager {
 		try {
 			flatfileConfig.save(flatfileDB);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			Log.severe("Failed to save flatfile DB!");
 			e.printStackTrace();
 		}
 	}

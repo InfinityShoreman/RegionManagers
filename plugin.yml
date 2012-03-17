@@ -1,0 +1,18 @@
+name: TownManager
+main: me.sirsavary.townmanager.Main
+version: 0.1
+author: SirSavary
+commands:
+  town:
+    description: Top level town command.
+    permission: TownManager.Town
+    usage:
+      /<command>
+permissions:
+  TownManager.*:
+    description: Gives access to all TownManager commands
+    children:
+      TownManager.Town: true
+  TownManager.Town:
+    description: Allows you to use /town
+    default: op
