@@ -3,15 +3,24 @@ package me.sirsavary.townmanager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
+
+import me.sirsavary.townmanager.commands.FirstRunCommand;
+import me.sirsavary.townmanager.commands.TownCommand;
+import me.sirsavary.townmanager.listeners.WandListener;
+
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
 	
-	static String name = "TownManager";
+	public static String name = "TownManager";
 	static ChatColor tagColor = ChatColor.RED;
 	static ChatColor messageColor = ChatColor.GREEN;
 	
@@ -21,10 +30,20 @@ public class Main extends JavaPlugin {
 	static File configFile = new File(pluginFolder, "Config.yml");
 	static YamlConfiguration yamlConfig = new YamlConfiguration();
 	
-	//The IOManager, used to interface with the Database that SkillsSystem uses
+	//The IOManager, used to interface with the Database that SkillSystem uses
 	public static IOManager fileManager;
 	
+	//The RegionHandler, used to interface with Regions
+	public static RegionHandler regionHandler;
+	
 	public static Server server;
+	
+	public static HashMap<Player, Location> firstPointMap = new HashMap<Player, Location>();
+	public static HashMap<Player, Location> secondPointMap = new HashMap<Player, Location>();
+	
+	public static PluginManager pm;
+	
+	private Boolean firstRun = false;
 	
 	//The DBType variable, used later on when passed off to the IOManager
 	String dbType;
@@ -66,50 +85,67 @@ public class Main extends JavaPlugin {
 			e.printStackTrace();
 		}
 		
-		//Now that config is loaded set DBType and make a new IOManager
-		dbType = yamlConfig.getString("Database.DBType","flatfile");
-		fileManager = new IOManager(this, dbType);
-		server = getServer();
-		
-		//TODO make sure plugin is disabled on first run (Just prevent anything from registering)
-		//Parse skills and register events
-		ParseConfigs();
-		RegisterEvents();
-		RegisterCommands();
-		
+		RegisterCommands(firstRun);
+		if (!firstRun) {
+			//Now that config is loaded set DBType and make a new IOManager
+			dbType = yamlConfig.getString("Database.DBType","flatfile");
+			fileManager = new IOManager(this, dbType);
+			regionHandler = new RegionHandler();
+			server = getServer();
+			//Parse skills and register events
+			ParseConfigs();
+			RegisterEvents();
+		}
 		Log.info("Plugin enabled!");
 	}
 	
+	/**
+	 * Reloads the plugin by re-parsing the config file,
+	 */
 	public void ReloadPlugin()
 	{
-		
+		ParseConfigs();
 	}
 	
+	/**
+	 * Registers commands
+	 */
 	private void RegisterEvents() {
-	    //PluginManager pm = getServer().getPluginManager();
-	    //pm.registerEvents(new PlayerListener(this), this); 	    
+	    pm.registerEvents(new WandListener(), this); 	    
 	}
 	
-	private void RegisterCommands() {
-		getCommand("town").setExecutor(new TownCommand(this));
+	/**
+	 * Registers commands, if parameter first run is true all commands  will return a firstrun message rather than returning a command not
+	 * found message
+	 * @param FirstRun
+	 *
+	 */
+	private void RegisterCommands(Boolean FirstRun) {
+		if (!firstRun) {
+			getCommand("town").setExecutor(new TownCommand(this));
+		}
+		else {
+			FirstRunCommand frc = new FirstRunCommand();
+			getCommand("town").setExecutor(frc);
+		}
 	}
 
-	/*
+	/**
 	 * Method to parse the skills inside the Skills file
 	 */
 	public void ParseConfigs() {
 
 	}
 
-	/*
+	/**
 	 * Method to load configuration files (Skills file and config file)
 	 */
 	private void LoadConfigurations() throws FileNotFoundException, IOException, InvalidConfigurationException {
 		yamlConfig.load(configFile);
 	}
 
-	/*
-	 * Method to be used on plugin's first run, generates fresh config file. Can also be called to config files.
+	/**
+	 * Method to be used on plugin's first run, generates fresh config file
 	 */
 	private void FirstRun() throws IOException {
 		//Config settings
@@ -121,6 +157,8 @@ public class Main extends JavaPlugin {
 		yamlConfig.set("Database.MySQL.Username", "User");
 		yamlConfig.set("Database.MySQL.Password","Pass");
 		yamlConfig.set("Database.MySQL.DBName", "Database");
+		
+		firstRun = true;
 
 
 		//Save all config values to file

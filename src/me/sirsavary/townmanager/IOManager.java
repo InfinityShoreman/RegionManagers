@@ -3,6 +3,8 @@ package me.sirsavary.townmanager;
 import java.io.File;
 import java.io.IOException;
 
+import me.sirsavary.townmanager.objects.Town;
+
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
