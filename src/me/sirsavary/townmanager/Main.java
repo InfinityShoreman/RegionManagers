@@ -111,6 +111,7 @@ public class Main extends JavaPlugin {
 	 * Registers commands
 	 */
 	private void RegisterEvents() {
+		pm = server.getPluginManager();
 	    pm.registerEvents(new WandListener(), this); 	    
 	}
 	
