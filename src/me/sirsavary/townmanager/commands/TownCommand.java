@@ -1,6 +1,8 @@
 package me.sirsavary.townmanager.commands;
 
+import me.sirsavary.townmanager.Chatter;
 import me.sirsavary.townmanager.Main;
+import me.sirsavary.townmanager.objects.Town;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,10 +22,36 @@ public class TownCommand implements CommandExecutor{
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		
 		String playerTown = (String) Main.fileManager.getValue("Players." + sender.getName() + ".Town");
-		
+		Player p = (Player) sender;
 		if (args.length == 0)
 		{
-			return true;
+			if (playerTown == null)
+			{
+				sender.sendMessage("Currently, you are not part of a town!");
+				sender.sendMessage("To create a town, type /town create");
+				sender.sendMessage("To join a town, type /town join [TownName]");
+				sender.sendMessage("If you cannot find a town to join, ask around or type /town list");
+			}
+			else 
+			{
+				Town t = new Town(playerTown);
+				if (t.getMayor() == p) {
+					p.sendMessage("You are the mayor of " + playerTown);
+					p.sendMessage(Main.fileManager.getValue(playerTown + ".TotalResidents").toString() + " total residents");
+					p.sendMessage("Is " + Main.fileManager.getValue("Towns." + playerTown + ".Size").toString() + " chunks in size");
+					p.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".TownPoints").toString() + " town points");
+					p.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".Coffers").toString() + " dollars in the coffers");
+					p.sendMessage(Chatter.Message("Type /town mayor for more info"));
+				}
+				else {
+					p.sendMessage("You are a resident of " + playerTown);
+					p.sendMessage(Main.fileManager.getValue(playerTown + ".TotalResidents").toString() + " total residents");
+					p.sendMessage("Is " + Main.fileManager.getValue("Towns." + playerTown + ".Size").toString() + " chunks in size");
+					p.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".TownPoints").toString() + " town points");
+					p.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".Coffers").toString() + " dollars in the coffers");
+					p.sendMessage(Chatter.Message("Type /town help for more info"));
+				}
+			}
 		}
 		else if (args.length == 1)
 		{
@@ -31,18 +59,18 @@ public class TownCommand implements CommandExecutor{
 			{
 				if (playerTown == null)
 				{
-					sender.sendMessage("Currently, you are not part of a town!");
-					sender.sendMessage("To create a town, type /town create");
-					sender.sendMessage("To join a town, type /town join [TownName]");
-					sender.sendMessage("If you cannot find a town to join, ask around or type /town list");
+					p.sendMessage("Currently, you are not part of a town!");
+					p.sendMessage("To create a town, type /town create");
+					p.sendMessage("To join a town, type /town join [TownName]");
+					p.sendMessage("If you cannot find a town to join, ask around or type /town list");
 				}
 				else 
 				{
-					sender.sendMessage("You are a resident of " + playerTown + "which:");
-					sender.sendMessage(Main.fileManager.getValue(playerTown + ".TotalResidents").toString() + " total residents");
-					sender.sendMessage("Is " + Main.fileManager.getValue(playerTown + ".Size").toString() + " chunks in size");
-					sender.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".TownPoints").toString() + " town points");
-					sender.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".Coffers").toString() + "dollars in the coffers");
+					p.sendMessage("You are a resident of " + playerTown + "which:");
+					p.sendMessage(Main.fileManager.getValue(playerTown + ".TotalResidents").toString() + " total residents");
+					p.sendMessage("Is " + Main.fileManager.getValue(playerTown + ".Size").toString() + " chunks in size");
+					p.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".TownPoints").toString() + " town points");
+					p.sendMessage("Has " + Main.fileManager.getValue(playerTown + ".Coffers").toString() + "dollars in the coffers");
 				}
 				return true;
 				
@@ -51,7 +79,7 @@ public class TownCommand implements CommandExecutor{
 			{			
 				if (sender instanceof Player) {
 					try {
-						new CreateTown(sender, true, plugin);
+						new TownCreate(sender, true, plugin);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

@@ -1,6 +1,6 @@
 name: TownManager
 main: me.sirsavary.townmanager.Main
-version: 0.2
+version: 0.4
 author: SirSavary
 commands:
   town:

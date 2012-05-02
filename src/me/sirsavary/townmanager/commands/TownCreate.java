@@ -3,7 +3,8 @@ package me.sirsavary.townmanager.commands;
 import me.sirsavary.questioner.LogBlockQuestioner;
 import me.sirsavary.townmanager.Chatter;
 import me.sirsavary.townmanager.Main;
-import me.sirsavary.townmanager.objects.Region;
+import me.sirsavary.townmanager.objects.Plot;
+import me.sirsavary.townmanager.objects.PlotType;
 import me.sirsavary.townmanager.objects.Selection;
 
 import org.bukkit.Material;
@@ -11,13 +12,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class CreateTown extends AbstractCommand
+public class TownCreate extends AbstractCommand
 {
 	String playerTown = (String) Main.fileManager.getValue("Players." + sender.getName() + ".Town");
 	
 	private final LogBlockQuestioner questioner;
 	
-	public CreateTown(CommandSender sender, boolean async, Main plugin) throws Exception {
+	public TownCreate(CommandSender sender, boolean async, Main plugin) throws Exception {
 		super(sender, async, plugin);
 		
 		questioner = (LogBlockQuestioner)plugin.getServer().getPluginManager().getPlugin("Questioner");
@@ -65,13 +66,11 @@ public class CreateTown extends AbstractCommand
 									sender.sendMessage("");
 									sender.sendMessage(Chatter.Message("Your town is almost complete!"));
 									sender.sendMessage(Chatter.Message("The last step is to choose a name for your town!"));
-									String townName = questioner.ask((Player)sender, Chatter.Message("Please choose a name for your town:"));
+									String townName = questioner.ask((Player)sender, Chatter.Message("Please choose a name for your tiown:"));
+
+									Plot region = new Plot(townName + "_townhall", sel.getMinPoint(), sel.getMaxPoint(), townName, PlotType.GOVERNMENT);
 									
-									Region region;
-									
-									region = new Region(townName + townName.hashCode() ,sel.getMinPoint(), sel.getMaxPoint());
-									
-									Main.regionHandler.SaveRegion(region);
+									Main.regionHandler.NewTown(region, townName, player);
 									
 									sender.sendMessage("");
 									sender.sendMessage(Chatter.Message("Congratulations!"));
