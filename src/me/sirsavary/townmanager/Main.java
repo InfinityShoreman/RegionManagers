@@ -5,10 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 
-import lib.spywhere.MFS.Database;
-import lib.spywhere.MFS.MFS;
-import lib.spywhere.MFS.StorageType;
-import lib.spywhere.MFS.Table;
+import me.sirsavary.questioner.Questioner;
 import me.sirsavary.townmanager.commands.FirstRunCommand;
 import me.sirsavary.townmanager.commands.TownCommand;
 import me.sirsavary.townmanager.listeners.BlockBreakListener;
@@ -21,7 +18,6 @@ import org.bukkit.Server;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -34,8 +30,7 @@ public class Main extends JavaPlugin {
 			+ name);
 	static File configFile = new File(pluginFolder, "Config.yml");
 	static YamlConfiguration yamlConfig = new YamlConfiguration();
-	// The IOManager, used to interface with the Database that SkillSystem uses
-	//TODO change over to MFS
+	// The IOManager, used to interface with the Database that TownManager uses
 	public static IOManager fileManager;
 	//Static variable so that the server is always within reach
 	public static Server server;
@@ -44,22 +39,21 @@ public class Main extends JavaPlugin {
 	//Hashmap storing the last town the player was in
 	public static HashMap<Player, Town> lastTownMap = new HashMap<Player, Town>();
 	// The RegionHandler, used to interface with Plots, Towns and Countries
-	//TODO Change name of regionhandler and consider splitting up functions into separate classes
 	public static RegionHandler regionHandler;
 	//The first and second point maps, used to store the locations of the blocks the player selected with his/her wand
 	public static HashMap<Player, Location> firstPointMap = new HashMap<Player, Location>();
 	public static HashMap<Player, Location> secondPointMap = new HashMap<Player, Location>();
 	//tagColor and messageColor are both used with Chatter.java to make messaging the player easier
-	static ChatColor tagColor = ChatColor.RED;
-	static ChatColor messageColor = ChatColor.GREEN;
+	public static ChatColor tagColor = ChatColor.RED;
+	public static ChatColor messageColor = ChatColor.GREEN;
+	public static Boolean debugEnabled = true;;
 	// The DBType variable, used later on when passed off to the IOManager
 	String dbType;
 	//firstRun is used to determine whether or not the plugin should be disabled
 	private Boolean firstRun = false;
-	//PluginDescriptionFile, used for MFS
-	private PluginDescriptionFile pdf = null;
 
-
+	public static Questioner questioner;
+	
 	/**
 	 * Method to be used on plugin's first run, generates fresh config file
 	 */
@@ -136,11 +130,15 @@ public class Main extends JavaPlugin {
 
 		RegisterCommands(firstRun);
 		if (!firstRun) {
+			server = getServer();
+			pm = server.getPluginManager();
 			// Now that config is loaded set DBType and make a new IOManager
 			dbType = yamlConfig.getString("Database.DBType", "flatfile");
 			fileManager = new IOManager(this, dbType);
 			regionHandler = new RegionHandler();
-			server = getServer();
+			questioner = (Questioner)pm.getPlugin("Questioner");
+			questioner.setDefaultMessageColor(messageColor);
+
 			// Parse skills and register events
 			ParseConfigs();
 			RegisterEvents();

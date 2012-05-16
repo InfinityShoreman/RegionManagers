@@ -29,7 +29,7 @@ public class TownChunk{
 		this.plots = plots;
 	}
 	public ArrayList<Plot> getPlots() {
-		if (plots.size() <= 0) return null;
+		if (plots == null || plots.size() <= 0) return null;
 		return plots;
 	}
 	public void setCountry(String country) {

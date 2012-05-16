@@ -8,27 +8,27 @@ import me.sirsavary.townmanager.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 public class Town extends Settlement {
 	
-	private Integer health;
+	private Integer health = 0;
 	
 	//Basic town variables
 	private World world;
-	private Player mayor;
-	private ChatColor color = ChatColor.WHITE;
+	private String mayor;
+	private ChatColor color = ChatColor.AQUA;
 	private Location spawnLocation = Main.server.getWorlds().get(0).getSpawnLocation();
-	private String MOTD = "";
+	private String MOTD = "New town is new";
 	private Integer coffers = 0;
 	private String country = "";
+	private Integer size;
 	
 	//Basic town flags
-	private boolean pvpAllowed = Boolean.parseBoolean(SettingsManager.townSettings.get("PVP"));
-	private boolean freeBuildAllowed = Boolean.parseBoolean(SettingsManager.townSettings.get("FREEBUILD"));
+	private Boolean pvpAllowed = Boolean.parseBoolean(SettingsManager.townSettings.get("PVP"));
+	private Boolean freeBuildAllowed = Boolean.parseBoolean(SettingsManager.townSettings.get("FREEBUILD"));
 	
-	//The town's Town Hall region
-	private Plot townHallRegion;
+	//The town's Town Hall Plot
+	private Plot townHallPlot;
 	
 	//Citizens
 	private List<String> citizens;
@@ -37,25 +37,50 @@ public class Town extends Settlement {
 	private TaxType taxType = TaxType.NONE;
 	private int tax = 0;
 	
-	public Town(String ID) {
+	//Special
+	private String formattedID;
+	
+	public Town(String ID, String Country, String Mayor, Plot TownHallPlot, String TT, Integer TaxRate, Boolean PVP, Boolean FreeBuild, Location SpawnLocation, Integer Coffers, Integer Health, String Color, String MOTD, Integer Size) {
 		super(ID);
-		// TODO Auto-generated constructor stub
+		setCountry(Country);
+		setMayor(Mayor);
+		setTownHallPlot(TownHallPlot);
+		setTaxType(TaxType.valueOf(TT.toUpperCase()));
+		setTax(TaxRate);
+		setPVPAllowed(PVP);
+		setFreeBuildAllowed(FreeBuild);
+		setSpawnLocation(SpawnLocation);
+		setCoffers(Coffers);
+		setHealth(Health);
+		setColor(ChatColor.valueOf(Color));
+		setMOTD(MOTD);
+		setSize(Size);
+		setFormattedID(this.getColor() + this.getID() + Main.messageColor);
 	}
 	
-	public void setMayor(Player mayor) {
+	public Town(String ID, Plot TownHallPlot, String Mayor) {
+		super(ID);
+		setTownHallPlot(TownHallPlot);
+		setMayor(Mayor);
+		this.world = TownHallPlot.getMaxPoint().getWorld();
+		setFormattedID(this.getColor() + this.getID() + Main.messageColor);
+		//Main.fileManager.SaveTown(this);
+	}
+
+	public void setMayor(String mayor) {
 		this.mayor = mayor;
 	}
 
-	public Player getMayor() {
+	public String getMayor() {
 		return mayor;
 	}
 
-	public void setTownHallRegion(Plot townHallRegion) {
-		this.townHallRegion = townHallRegion;
+	public void setTownHallPlot(Plot townHallPlot) {
+		this.townHallPlot = townHallPlot;
 	}
 
-	public Plot getTownHallRegion() {
-		return townHallRegion;
+	public Plot getTownHallPlot() {
+		return townHallPlot;
 	}
 
 	public void setSpawnLocation(Location spawnLocation) {
@@ -76,6 +101,7 @@ public class Town extends Settlement {
 
 	public void setColor(ChatColor townColor) {
 		this.color = townColor;
+		setFormattedID(this.getColor() + this.getID() + Main.messageColor);
 	}
 
 	public ChatColor getColor() {
@@ -103,19 +129,19 @@ public class Town extends Settlement {
 		return taxType;
 	}
 
-	public void setPvpAllowed(boolean pvpAllowed) {
+	public void setPVPAllowed(Boolean pvpAllowed) {
 		this.pvpAllowed = pvpAllowed;
 	}
 
-	public boolean isPvpAllowed() {
+	public Boolean isPVPAllowed() {
 		return pvpAllowed;
 	}
 
-	public void setFreeBuildAllowed(boolean freeBuildAllowed) {
+	public void setFreeBuildAllowed(Boolean freeBuildAllowed) {
 		this.freeBuildAllowed = freeBuildAllowed;
 	}
 
-	public boolean isFreeBuildAllowed() {
+	public Boolean isFreeBuildAllowed() {
 		return freeBuildAllowed;
 	}
 
@@ -149,5 +175,21 @@ public class Town extends Settlement {
 
 	public String getCountry() {
 		return country;
+	}
+
+	public Integer getSize() {
+		return size;
+	}
+
+	public void setSize(Integer size) {
+		this.size = size;
+	}
+
+	public String getFormattedID() {
+		return formattedID;
+	}
+
+	public void setFormattedID(String formattedID) {
+		this.formattedID = formattedID;
 	}
 }

@@ -32,12 +32,12 @@ public class WandListener implements Listener {
 				p.sendMessage("Second point set to " + l.getX() + ", " + l.getY() + ", " + l.getZ());
 			}
 			else if (p.hasPermission(Main.name + ".Inspect") && p.getItemInHand().getType() == Material.BOOK) {
-				if (Main.regionHandler.isChunkOccupied(event.getClickedBlock().getChunk())) {
+				if (Main.fileManager.isChunkOccupied(event.getClickedBlock().getChunk())) {
 					String message = "Regions: ";
 					boolean s = false;
-					for (Plot r : Main.regionHandler.getPlotsAtChunk(event.getClickedBlock().getChunk())) {
+					for (Plot r : Main.fileManager.getPlotsAtChunk(event.getClickedBlock().getChunk())) {
 						if (Main.regionHandler.isBlockWithinRegion(event.getClickedBlock(), r)) {
-							message = message + r.getRegionID() + " belonging to town " + r.getTownID();
+							message = message + r.getID() + " belonging to town " + r.getTownID();
 							s = true;
 						}
 					}

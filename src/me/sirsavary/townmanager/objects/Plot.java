@@ -1,37 +1,37 @@
 package me.sirsavary.townmanager.objects;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 public class Plot extends Selection {
 	private String townID;
-	private Player playerOwner;
-	private String ownerName;
+	private String owner;
 	private String ID;
 	private PlotType plotType;
+	private String members;
 	
-	public Plot(String ID, Location min, Location max, String town, PlotType PT){
+	/*public Plot(String ID, Location min, Location max, String town, PlotType PT){
 		super(min, max);
 		this.setID(ID.toLowerCase());
 		setTownID(town);
 		setPlotType(PT);
-		setPlayerOwner(null);
-	}
+		setOwner(null);
+	}*/
 	
-	public Plot(String ID, Location min, Location max, String town, PlotType PT, Player PO){
+	public Plot(String ID, Location min, Location max, String town, PlotType PT, String Owner){
 		super(min, max);
 		this.setID(ID.toLowerCase());
 		setTownID(town);
 		setPlotType(PT);
-		setPlayerOwner(PO);
+		setOwner(Owner);
 	}
-
-	public void setOwnerName(String ownerName) {
-		this.ownerName = ownerName;
-	}
-
-	public String getOwnerName() {
-		return ownerName;
+	
+	public Plot(String ID, Location min, Location max, String town, PlotType PT, String Owner, String Members){
+		super(min, max);
+		this.setID(ID.toLowerCase());
+		setTownID(town);
+		setPlotType(PT);
+		setOwner(Owner);
+		setMembers(Members);
 	}
 
 	public void setID(String ID) {
@@ -41,15 +41,7 @@ public class Plot extends Selection {
 	public String getID() {
 		return ID;
 	}
-
-	public void setPlayerOwner(Player playerOwner) {
-		this.playerOwner = playerOwner;
-	}
-
-	public Player getPlayerOwner() {
-		return playerOwner;
-	}
-
+	
 	public void setTownID(String townID) {
 		this.townID = townID;
 	}
@@ -64,5 +56,21 @@ public class Plot extends Selection {
 
 	public PlotType getPlotType() {
 		return plotType;
+	}
+
+	public String getOwner() {
+		return owner;
+	}
+
+	public void setOwner(String owner) {
+		this.owner = owner;
+	}
+
+	public String getMembers() {
+		return members;
+	}
+
+	public void setMembers(String members) {
+		this.members = members;
 	}
 }
