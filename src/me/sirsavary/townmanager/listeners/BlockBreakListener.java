@@ -110,12 +110,14 @@ public class BlockBreakListener implements Listener {
 				//Send the player a message and update lastTownMap
 				p.sendMessage(Chatter.Message("~Wilderness~"));
 				Main.lastTownMap.put(p, newTown);
+				p.performCommand("dynmap hide");
 			}
 			//If player is heading into town
 			else if (newTown != null) {
 				//Send the player a message using the new town's color and name and update lastTownMap
 				p.sendMessage(newTown.getColor() + newTown.getID() + " - " + newTown.getMOTD());
 				Main.lastTownMap.put(p, newTown);
+				p.performCommand("dynmap show");
 			}
 		}
 		//Town --> Town
