@@ -9,6 +9,7 @@ import me.sirsavary.questioner.Questioner;
 import me.sirsavary.townmanager.commands.FirstRunCommand;
 import me.sirsavary.townmanager.commands.TownCommand;
 import me.sirsavary.townmanager.listeners.BlockBreakListener;
+import me.sirsavary.townmanager.listeners.PVPListener;
 import me.sirsavary.townmanager.listeners.WandListener;
 import me.sirsavary.townmanager.objects.Town;
 
@@ -61,7 +62,7 @@ public class Main extends JavaPlugin {
 		// Config settings
 		
 		// Database settings
-		yamlConfig.set("Database.DBType", "flatfile");
+		yamlConfig.set("Database.DBType", "yml");
 		yamlConfig.set("Database.MySQL.Host", "localhost");
 		yamlConfig.set("Database.MySQL.Port", "3306");
 		yamlConfig.set("Database.MySQL.Username", "User");
@@ -142,6 +143,7 @@ public class Main extends JavaPlugin {
 			// Parse skills and register events
 			ParseConfigs();
 			RegisterEvents();
+			//TownMapRenderer.drawToMap(server.getMap((short) 0));
 		}
 		Log.info("Plugin enabled!");
 	}
@@ -177,6 +179,7 @@ public class Main extends JavaPlugin {
 		pm = server.getPluginManager();
 		pm.registerEvents(new WandListener(), this);
 		pm.registerEvents(new BlockBreakListener(), this);
+	    pm.registerEvents(new PVPListener(), this); 	  
 	}
 
 	/**

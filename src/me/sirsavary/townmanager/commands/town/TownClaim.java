@@ -22,7 +22,7 @@ public class TownClaim {
 			TownChunk tc = Main.fileManager.getTownChunkAtChunk(p.getLocation().getChunk()); //TownChunk(p.getLocation().getChunk(), null, t.getCountry(), t.getID());
 			
 			if (tc == null) {
-				if (t.getSize() < t.getCitizens().size() * 3 + 5) {
+				if (t.getSize() < t.getCitizens().size() * 5 + 5) {
 					tc = new TownChunk(p.getLocation().getChunk(), null, t.getCountry(), t.getID());
 					Main.fileManager.TrackChunk(tc);
 					p.sendMessage(Chatter.Message("Chunk claimed!"));

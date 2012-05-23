@@ -19,9 +19,7 @@ public class TownRemove extends AbstractCommand {
 
 	@Override
 	public void run() {
-		sender.sendMessage("Dolan Dolan");
 		Town t = Main.fileManager.getPlayerTown((Player) sender);
-		sender.sendMessage("Dolan Dolan");
 		if (t == null) {
 			sender.sendMessage(Chatter.TagMessage("You are not part of a town!"));
 		}

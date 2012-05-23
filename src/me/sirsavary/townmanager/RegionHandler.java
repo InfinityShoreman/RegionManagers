@@ -16,6 +16,7 @@ public class RegionHandler {
 	 **/
 	public Selection getSelection(Player player) {
 		Log.info("Getting selection");
+		if (Main.firstPointMap.get(player) == null || Main.secondPointMap.get(player) == null) return null;
 		return new Selection(Main.firstPointMap.get(player),
 				Main.secondPointMap.get(player));
 	}

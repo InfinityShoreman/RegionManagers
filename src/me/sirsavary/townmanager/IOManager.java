@@ -1,6 +1,8 @@
 package me.sirsavary.townmanager;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import lib.spywhere.MFS.DataType;
@@ -37,7 +39,7 @@ public class IOManager {
 	public static Table countryTB;
 	
 	private ArrayList<Plot> livePlotList = new ArrayList<Plot>();
-	private ArrayList<Town> liveTownList = new ArrayList<Town>();
+	private HashMap<String, Town> liveTownList = new HashMap<String, Town>();
 	private ArrayList<Country> liveCountryList = new ArrayList<Country>();
 	private ArrayList<TownChunk> liveChunkList = new ArrayList<TownChunk>();
 	public IOManager(Main Instance, String DBType) {
@@ -102,12 +104,14 @@ public class IOManager {
 					new Field("Color", DataType.String), new Field("MOTD", DataType.String));
 		}
 		if (playerTB == null) {
-			playerTB = DB.createNewTable("Players", new Field("Name", DataType.String), new Field("Town", DataType.String));
+			playerTB = DB.createNewTable("Players", new Field("Name", DataType.String), new Field("Town", DataType.String), new Field("Map", DataType.Integer));
 		}
 		if (plotTB == null) {
 			plotTB = DB.createNewTable("Plots", new Field("ID", DataType.String), new Field("MaxPoint", DataType.String), new Field("MinPoint", DataType.String), new Field("Type", DataType.String),
 					new Field("Town", DataType.String), new Field("Owner", DataType.String), new Field("Members", DataType.String));
 		}
+		
+		playerTB.addField(new Field("Map",DataType.Integer));
 	}
 	private void PullDataFromDatabase() {
 		Result r;
@@ -127,7 +131,6 @@ public class IOManager {
 			Location maxPos = new Location(Main.server.getWorlds().get(0), Double.parseDouble(rawMaxPos[0]), Double.parseDouble(rawMaxPos[1]), Double.parseDouble(rawMaxPos[2]));
 			String plotTown = rec.getData(new Field("Town"));
 			String plotType = rec.getData(new Field("Type")).toUpperCase();
-			Debug.info(ID + minPos.toString() + maxPos.toString() + plotTown + plotType);
 			this.livePlotList.add(new Plot(ID, minPos, maxPos, plotTown, PlotType.valueOf(plotType), owner, members));
 		}
 		}
@@ -137,7 +140,6 @@ public class IOManager {
 		for (i = 0; i < r.totalRecord(); i++) {
 			Record rec = r.getRecord(i);
 			ArrayList<Plot> pList = new ArrayList<Plot>();
-			Log.info(rec.toString() + " " + rec.totalField() + " " + rec.getData(new Field("Plots")));
 			if (rec.getData(new Field("Plots")) != null || !rec.getData(new Field("Plots")).equalsIgnoreCase("")) {
 				String[] rawPList = rec.getData(new Field("Plots")).split(",");
 				for (String s : rawPList) {
@@ -179,25 +181,51 @@ public class IOManager {
 			
 			String[] rawSpawnLocation = rec.getData(new Field("SpawnLocation")).split(",");
 			Location spawnLocation = new Location(townHallPlot.getMinPoint().getWorld(), Double.parseDouble(rawSpawnLocation[0]), Double.parseDouble(rawSpawnLocation[1]), Double.parseDouble(rawSpawnLocation[2])); //The town's spawn location, may be null
+						
 			Town newTown = new Town(name, country, mayor, townHallPlot, taxType, taxAmount, pvpAllowed, freeBuildAllowed, spawnLocation, coffers, health, color, motd, size);
-
+			
 			List<String> list = new ArrayList<String>();
 
 			Result playerRes = playerTB.filterRecord("Town", name);
-			for (i = 0; i < playerRes.totalRecord(); i++) {
-				list.add(playerRes.getRecord(i).getData(new Field("Name")));
+			for (int a = 0; a < playerRes.totalRecord(); a++) {
+				list.add(playerRes.getRecord(a).getData(new Field("Name")));
 			}
 			
 			newTown.setCitizens(list);
-			this.liveTownList.add(newTown);
+			this.liveTownList.put(newTown.getID(), newTown);
 		}
 		}
+		
+		for (Plot p : livePlotList) {
+			Log.info(p.getID() + "; " + p.getMinPoint() + "," + p.getMaxPoint());
+		}
+	}
+	public Integer getPlayerMap(String player) {
+		Result res = playerTB.filterRecord("Name", player);
+		if (res.totalRecord() <= 0) return null;
+		try {
+			return Integer.parseInt(res.getRecord(0).getData(new Field("Map")));
+		} catch (NullPointerException e) {
+			return null;
+		}
+	}
+	public void setPlayerMap(String player, Integer mapNumber) {
+		Result res = playerTB.filterRecord("Name", player);
+		if (res.totalRecord() == 1) {
+			playerTB.deleteRecords(res);
+			Record rec = res.getRecord(0);
+			playerTB.addRecord(player, rec.getData(new Field("Town")), "" + mapNumber);
+		}
+		else {
+			playerTB.addRecord(player, "", "" + mapNumber);
+		}
+	
 	}
 	public Plot getPlot(String plotName) {
 		for (Plot p : livePlotList) {
 			if (p.getID().equalsIgnoreCase(plotName)) {
 				return p;
-			}
+			} 
 		}
 		return null;
 	}
@@ -219,12 +247,7 @@ public class IOManager {
 		this.livePlotList.add(plot);
 	}	
 	public Town getTown(String townName) {
-		for (Town t : liveTownList) {
-			if (t.getID().equalsIgnoreCase(townName)) {
-				return t;
-			}
-		}
-		return null;
+		return liveTownList.get(townName);
 	}
 	public void SaveTown(Town town) {
 		String name = town.getID(); //The name of the town
@@ -247,9 +270,8 @@ public class IOManager {
 		
 		String spawnLocation = x1 + "," + y1 + "," + z1;
 		townTB.addRecord(name, country, mayor, townHallPlot, taxType, taxAmount.toString(), pvpAllowed, freeBuildAllowed, spawnLocation, coffers.toString(), health.toString(), color, motd);
-		Debug.info("Total town records: "+ townTB.getRecords().totalRecord());
 		town.setSize(chunkTB.filterRecord("Town", name).totalRecord());
-		this.liveTownList.add(town);
+		this.liveTownList.put(town.getID(), town);
 	}
 	public void UpdateTown(Town town) {
 		String name = town.getID(); //The name of the town
@@ -274,12 +296,7 @@ public class IOManager {
 		townTB.deleteRecords(townTB.filterRecord("ID", town.getID()));
 		townTB.addRecord(name, country, mayor, townHallPlot, taxType, taxAmount.toString(), pvpAllowed, freeBuildAllowed, spawnLocation, coffers.toString(), health.toString(), color, motd);
 		town.setSize(chunkTB.filterRecord("Town", name).totalRecord());
-		this.liveTownList.add(town);
-		for (Town t: liveTownList) {
-			if (t.getID().equalsIgnoreCase(town.getID())) {
-				t = town;
-			}
-		}
+		this.liveTownList.put(town.getID(), town);
 	}
 	public Country getCountry(String  countryName) {
 		for (Country t : liveCountryList) {
@@ -388,9 +405,8 @@ public class IOManager {
 		if (livePlotList.size() <= 0) return null;
 		return livePlotList;
 	}
-	public ArrayList<Town> getTowns() {
-		if (liveTownList.size() <= 0) return null;
-		return liveTownList;
+	public Collection<Town> getTowns() {
+		return liveTownList.values();
 	}
 	public ArrayList<Country> getCountries() {
 		if (liveCountryList.size() <= 0) return null;
@@ -433,20 +449,13 @@ public class IOManager {
 			}
 		}
 		//If it did not exist, add a new one to the list for tracking
-		Log.info("Tracking new chunk");
 		if (chunk.getPlots() != null) {
-			Log.info("Chunk has plots");
 			for (Plot p : chunk.getPlots()) {
 				if (plots.equals("")) plots = plots + p.getID();
 				else plots = plots + p.getID() + ",";
 			}
 		}
 		else plots = null;
-		Log.info("X: " + chunk.getX());
-		Log.info("Z: " + chunk.getZ());
-		Log.info("Town: " + chunk.getTown());
-		Log.info("Country: " + chunk.getCountry());
-		Log.info("Plots: " + plots);
 		chunkTB.addRecord("" + chunk.getX() , "" + chunk.getZ(), chunk.getTown(), chunk.getCountry(), plots);
 		this.liveChunkList.add(chunk);
 		
@@ -468,7 +477,7 @@ public class IOManager {
 		}
 	}
 	public Town getPlayerTown(Player player) {
-		Result r = playerTB.filterRecord("Player", player.getName());
+		Result r = playerTB.filterRecord("Name", player.getName());
 		if (r.totalRecord() <= 0) return null;
 		else return getTown(r.getRecord(0).getData(new Field("Town")));
 	}
@@ -479,13 +488,29 @@ public class IOManager {
 		plotTB.deleteRecords(plotTB.filterRecord("Town", t.getID()));
 		
 		livePlotList = new ArrayList<Plot>();
-		liveTownList = new ArrayList<Town>();
+		liveTownList = new HashMap<String, Town>();
 		liveChunkList = new ArrayList<TownChunk>();
 		
 		PullDataFromDatabase();
 	}
 	public void AddCitizen(String player, Town town) {
-		playerTB.addRecord(player, town.getID());
+		int mapNumber;
+		try {
+			mapNumber = Main.fileManager.getPlayerMap(player);
+		} catch (NullPointerException e) {
+			mapNumber = (int) Main.server.createMap(Main.server.getPlayer(player).getWorld()).getId();
+			Main.fileManager.setPlayerMap(player, mapNumber);
+		}
+		
+		Result res = playerTB.filterRecord("Name", player);
+		if (res.totalRecord() == 1) {
+			playerTB.deleteRecords(res);
+			playerTB.addRecord(player, town.getID(), "" + mapNumber);
+		}
+		else {
+			playerTB.addRecord(player, town.getID(), "" + mapNumber);
+		}
+
 		List<String> list = town.getCitizens();
 		list.add(player);
 		town.setCitizens(list);
@@ -541,6 +566,11 @@ public class IOManager {
 		Result res = chunkTB.filterRecord("X", "" + townChunkToRemove.getX());
 		res = res.filterBy("Z", "" + townChunkToRemove.getZ());
 		chunkTB.deleteRecords(res);
+		
+		if (chunk.getTown() != null || !chunk.getTown().equalsIgnoreCase("")) {
+			Town t = getTown(chunk.getTown());
+			t.setSize(t.getSize() - 1);
+		}
 	}
 	public boolean isPlayerMemberOfPlot(Plot plot, Player p) {
 		String[] memberArray = plot.getMembers().split(",");

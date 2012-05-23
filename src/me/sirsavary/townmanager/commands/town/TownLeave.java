@@ -12,10 +12,10 @@ public class TownLeave extends AbstractCommand {
 
 	private final Player p;
 	
-	public TownLeave(CommandSender sender, boolean async, Main plugin, Player player)
+	public TownLeave(CommandSender sender, boolean async, Main plugin)
 			throws Exception {
 		super(sender, async, plugin);
-		p = player;
+		p = (Player) sender;
 	}
 
 	@Override

@@ -22,56 +22,59 @@ public class TownCreate extends AbstractCommand
 	}
 
 	private void CreateTown() {
-		sender.sendMessage("");
-		sender.sendMessage("Please head to your town hall");
-		if (Main.questioner.ask((Player)sender, "When you are there type anything to continue") != null) {
+		Player player = (Player) sender;
+		player.sendMessage("");
+		player.sendMessage(Chatter.Message("Please head to your town hall"));
+		if (Main.questioner.ask(player, Chatter.Message("When you are there type anything to continue")) != null) {
 
-			sender.sendMessage("");
-			sender.sendMessage(Chatter.Message("Before we can go to the next step,"));
-			sender.sendMessage(Chatter.Message("Make sure your hand is empty"));
-			if (Main.questioner.ask((Player)sender, "When it is empty type anything to continue") != null) {
-				ItemStack brickStack = new ItemStack(Material.CLAY_BRICK, 1);
-				Player player = (Player) sender;
+			player.sendMessage("");
+			player.sendMessage(Chatter.Message("Before we can go to the next step,"));
+			player.sendMessage(Chatter.Message("Make sure your hand is empty"));
+			if (Main.questioner.ask((Player)player, "When it is empty type anything to continue") != null) {
+				ItemStack brickStack = new ItemStack(Material.CLAY_BRICK, 1);		
 				player.setItemInHand(brickStack);
-				sender.sendMessage("");
-				sender.sendMessage(Chatter.Message("This is your town brick!"));
-				sender.sendMessage(Chatter.Message("It is used for town construction functions,"));
-				sender.sendMessage(Chatter.Message("Including plot management and land claiming!"));
-				sender.sendMessage(Chatter.Message("With the brick in your hand,"));
-				sender.sendMessage(Chatter.Message("Left click one corner of your town hall"));
-				sender.sendMessage(Chatter.Message("Then, right click the other corner"));
-				if (Main.questioner.ask((Player)sender, "When both corners are selected type anything to continue") != null) {
+				player.sendMessage("");
+				player.sendMessage(Chatter.Message("This is your town brick!"));
+				player.sendMessage(Chatter.Message("It is used for town construction functions,"));
+				player.sendMessage(Chatter.Message("Including plot management and land claiming!"));
+				player.sendMessage(Chatter.Message("With the brick in your hand,"));
+				player.sendMessage(Chatter.Message("Left click one corner of your town hall"));
+				player.sendMessage(Chatter.Message("Then, right click the other corner"));
+				if (Main.questioner.ask((Player)player, "When both corners are selected type anything to continue") != null) {
 
 					Selection sel = Main.regionHandler.getSelection(player);
 
 					if (sel == null) {
-						sender.sendMessage("");
+						player.sendMessage("");
 						player.sendMessage(Chatter.Message("You did not select your town hall!"));
 						player.sendMessage(Chatter.Message("Now we have to do this all over again!"));
 						player.sendMessage(Chatter.Message("Type /town create when you'd like to try again"));
 					}
 					else {
-						sender.sendMessage("");
-						sender.sendMessage(Chatter.Message("Your town is almost complete!"));
-						sender.sendMessage(Chatter.Message("The last step is to choose a name for your town!"));
-						String townName = Main.questioner.ask((Player)sender, "Please choose a name for your town:");
+						player.sendMessage("");
+						player.sendMessage(Chatter.Message("Your town is almost complete!"));
+						player.sendMessage(Chatter.Message("The last step is to choose a name for your town!"));
+						String townName = Main.questioner.ask((Player)player, "Please choose a name for your town:");
+						if (townName.equalsIgnoreCase("timed out")) {
+							player.sendMessage(Chatter.TagMessage("You took too long! Operation cancelled!"));
+						}
+						else {
+							Plot region = new Plot("townhall", sel.getMinPoint(), sel.getMaxPoint(), townName, PlotType.GOVERNMENT, player.getName());
+							
+							Town newTown = new Town(townName, region, player.getName());
+							Main.fileManager.SaveTown(newTown);
+							Main.fileManager.AddCitizen(player.getName(), newTown);
+							Main.fileManager.SavePlot(region);
+							Main.fileManager.TrackPlotChunks(region);
 
-						Plot region = new Plot(townName + "_townhall", sel.getMinPoint(), sel.getMaxPoint(), townName, PlotType.GOVERNMENT, sender.getName());
-						
-						Town newTown = new Town(townName, region, player.getName());
-						Main.fileManager.SaveTown(newTown);
-						Main.fileManager.AddCitizen(player.getName(), newTown);
-						Main.fileManager.SavePlot(region);
-						Main.fileManager.TrackPlotChunks(region);
+							player.sendMessage("");
+							player.sendMessage(Chatter.Message("Congratulations!"));
+							player.sendMessage(Chatter.Message("You survived the town creation process!"));
 
-						sender.sendMessage("");
-						sender.sendMessage(Chatter.Message("Congratulations!"));
-						sender.sendMessage(Chatter.Message("You survived the town creation process!"));
-						sender.sendMessage(Chatter.Message("Don't forget to setup your town flags and settings!"));
-
-						sender.sendMessage("");
-						if (Main.questioner.ask((Player)sender, "Edit flags and settings now?", "yes", "no").equals("yes")) {
-							//new ConfigureTown(sender, true, null);
+							/*player.sendMessage("");
+							if (Main.questioner.ask((Player)player, "Edit flags and settings now?", "yes", "no").equals("yes")) {
+								//new ConfigureTown(player, true, null);
+							}*/
 						}
 					}
 				}
