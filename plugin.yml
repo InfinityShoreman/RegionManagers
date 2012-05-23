@@ -1,6 +1,6 @@
 name: TownManager
 main: me.sirsavary.townmanager.Main
-version: 0.6
+version: 0.7.1
 author: SirSavary
 commands:
   town:
@@ -11,8 +11,15 @@ commands:
 permissions:
   TownManager.*:
     description: Gives access to all TownManager commands
+    default: true
     children:
       TownManager.Town: true
   TownManager.Town:
     description: Allows you to use /town
-    default: op
+    default: true
+  TownManager.Wand:
+    description: Allows you to use the wand
+    default: true
+  TownManager.Inspect:
+    description: Allows you to use the inspection tool
+    default: true
