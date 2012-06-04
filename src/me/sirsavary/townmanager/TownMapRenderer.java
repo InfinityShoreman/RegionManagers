@@ -28,6 +28,7 @@ public class TownMapRenderer extends MapRenderer {
 	public void render(MapView map, MapCanvas canvas, Player p) {
 
 		Byte lastWildernessColor = MapPalette.BROWN;
+		Boolean firstCycle = true;
 		
 		renderIndex++;
 		if (((renderIndex % MAP_SECOND_DELAY) * 20) != 0) return;
@@ -39,6 +40,7 @@ public class TownMapRenderer extends MapRenderer {
 		this.canvas = canvas;
 
 		TownChunk[][] chunkArray = new TownChunk[7][5];
+		TownChunk[][] oldChunkArray = new TownChunk[7][5];
 		Chunk playerChunk = p.getLocation().getChunk();
 
 		int playerX = playerChunk.getX();
@@ -60,42 +62,48 @@ public class TownMapRenderer extends MapRenderer {
 					
 				Byte color = null;
 				TownChunk tc = chunkArray[x][y];
+				TownChunk otc = oldChunkArray[x][y];
 				Town t = null;
-
-				if (tc == null) //No townchunk, aka wilderness
-				{
-					if (lastWildernessColor == MapPalette.DARK_GRAY) {
-						color = MapPalette.GRAY_1; 
-						lastWildernessColor = MapPalette.GRAY_1;
-					}
-					else {
-						color = MapPalette.DARK_GRAY; 
-						lastWildernessColor = MapPalette.DARK_GRAY;
-					}
-				}
-				else {
-					Town playerTown = Main.fileManager.getPlayerTown(p);
-					t = Main.fileManager.getTown(tc.getTown());
-					if ((playerTown != null) && (t == playerTown)) color = MapPalette.LIGHT_GREEN;//TownChunk belongs to players town
-					else color = MapPalette.BLUE; //Other Town
-					if (lastWildernessColor == MapPalette.DARK_GRAY) {
-						lastWildernessColor = MapPalette.GRAY_1;
-					}
-					else {
-						lastWildernessColor = MapPalette.DARK_GRAY;
-					}
-				}
-
-				setCanvasSquare(color, (x * 18) + 1, 109 - y * 18, 18);
-				MapCursorCollection cursors = canvas.getCursors();
-				for (int i = 0; i < cursors.size(); i++) {
-					cursors.removeCursor(cursors.getCursor(i));
-				}
 				
-				//MapCursor mc = new MapCursor((byte) 0, (byte) 36, (byte) 15, (byte) 0, true);
-				//cursors.addCursor(mc);
+				if (tc == otc && firstCycle == false) return;
+
+					if (tc == null) //No townchunk, aka wilderness
+					{
+						if (lastWildernessColor == MapPalette.DARK_GRAY) {
+							color = MapPalette.GRAY_1; 
+							lastWildernessColor = MapPalette.GRAY_1;
+						}
+						else {
+							color = MapPalette.DARK_GRAY; 
+							lastWildernessColor = MapPalette.DARK_GRAY;
+						}
+					}
+					else {
+						Town playerTown = Main.fileManager.getPlayerTown(p);
+						t = Main.fileManager.getTown(tc.getTown());
+						if ((playerTown != null) && (t == playerTown)) color = MapPalette.LIGHT_GREEN;//TownChunk belongs to players town
+						else color = MapPalette.BLUE; //Other Town
+						if (lastWildernessColor == MapPalette.DARK_GRAY) {
+							lastWildernessColor = MapPalette.GRAY_1;
+						}
+						else {
+							lastWildernessColor = MapPalette.DARK_GRAY;
+						}
+					}
+
+					setCanvasSquare(color, (x * 18) + 1, 109 - y * 18, 18);
+					MapCursorCollection cursors = canvas.getCursors();
+					for (int i = 0; i < cursors.size(); i++) {
+						cursors.removeCursor(cursors.getCursor(i));
+					}
+					
+					//MapCursor mc = new MapCursor((byte) 0, (byte) 36, (byte) 15, (byte) 0, true);
+					//cursors.addCursor(mc);
+					oldChunkArray[x][y] = chunkArray[x][y];
+				}
 			}
-		}
+		firstCycle = false;
+		//oldChunkArray = chunkArray;
 	}
 
 	private void setCanvasSquare(byte color , int x , int z , int size){

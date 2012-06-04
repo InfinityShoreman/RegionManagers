@@ -22,6 +22,7 @@ public class TownBaseCommand extends AbstractCommand {
 		p = (Player) sender;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void run() {
 		Town t = Main.fileManager.getPlayerTown(p);

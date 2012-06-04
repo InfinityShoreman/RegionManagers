@@ -78,13 +78,13 @@ public class IOManager {
 		}
 		else {
 			StorageType ST = StorageType.valueOf(dbType.toUpperCase());
-			if (ST == StorageType.FLATFILE || ST == StorageType.YML) mfs = MFSConnector.getMFS(Main.pm, ST);
-			else mfs = MFSConnector.getMFS(Main.pm, "127.0.0.1", "root", "twilight", ST);
+			if (ST == StorageType.FLATFILE || ST == StorageType.YML || ST == StorageType.SQLITE) mfs = MFSConnector.getMFS(Main.pm, ST);
+			else mfs = MFSConnector.getMFS(Main.pm, Main.yamlConfig.getString("Database.MySQL.Host"), Main.yamlConfig.getString("Database.MySQL.Username"), Main.yamlConfig.getString("Database.MySQL.Password"), ST);
 			return true;
 		}	
 	}
 	private void CheckDatabase() {
-		DB = mfs.getDB(Main.name);
+		DB = mfs.getDB( Main.yamlConfig.getString("Database.MySQL.DBName"));
 		if (DB == null) DB = mfs.createNewDB(Main.name);		
 		chunkTB = DB.getTable("Chunks");
 		countryTB = DB.getTable("Countries");
@@ -214,10 +214,10 @@ public class IOManager {
 		if (res.totalRecord() == 1) {
 			playerTB.deleteRecords(res);
 			Record rec = res.getRecord(0);
-			playerTB.addRecord(player, rec.getData(new Field("Town")), "" + mapNumber);
+			playerTB.addRecord(player, rec.getData(new Field("Town")), mapNumber.toString());
 		}
 		else {
-			playerTB.addRecord(player, "", "" + mapNumber);
+			playerTB.addRecord(player, null, mapNumber.toString());
 		}
 	
 	}
@@ -496,10 +496,10 @@ public class IOManager {
 	public void AddCitizen(String player, Town town) {
 		int mapNumber;
 		try {
-			mapNumber = Main.fileManager.getPlayerMap(player);
+			mapNumber = this.getPlayerMap(player);
 		} catch (NullPointerException e) {
-			mapNumber = (int) Main.server.createMap(Main.server.getPlayer(player).getWorld()).getId();
-			Main.fileManager.setPlayerMap(player, mapNumber);
+			mapNumber = (int) Main.server.createMap(town.getWorld()).getId();
+			this.setPlayerMap(player, mapNumber);
 		}
 		
 		Result res = playerTB.filterRecord("Name", player);

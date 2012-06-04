@@ -13,6 +13,7 @@ import me.sirsavary.townmanager.commands.town.TownSettings;
 import me.sirsavary.townmanager.commands.town.TownTeleport;
 import me.sirsavary.townmanager.commands.town.TownUnclaim;
 import me.sirsavary.townmanager.commands.town.admin.TownAdminRemove;
+import me.sirsavary.townmanager.commands.town.admin.TownAdminSettings;
 import me.sirsavary.townmanager.objects.Town;
 
 import org.bukkit.command.Command;
@@ -210,6 +211,18 @@ public class TownCommand implements CommandExecutor {
 					new TownAdminRemove(player, true, plugin, args[2]);
 				} catch (Exception e) {
 					e.printStackTrace();
+				}	
+			}
+			else if (args[1].equalsIgnoreCase("settings")) {
+				String townName = null;
+				for (int x = 2; x < args.length; x++) {
+					townName = townName + args[x] + " ";
+				}
+				townName.trim();
+				try {
+					new TownAdminSettings(player, true, plugin, args[2]);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 	}
@@ -222,12 +235,8 @@ public class TownCommand implements CommandExecutor {
 		p.sendMessage(Chatter.Message("/town plot info [ID] - Gets the info from a plot"));
 	}
 	private void AdminHelp(Player p) {
-		p.sendMessage(Chatter.Message("/town plot new [ID]- Makes a new plot"));
-		p.sendMessage(Chatter.Message("/town plot remove [ID]"));
-		p.sendMessage(Chatter.Message("/town plot addowner [ID] [OWNER] - Adds an owner to a plot"));
-		p.sendMessage(Chatter.Message("/town plot delowner [ID] [OWNER] - Removes an owner from a plot"));
-		p.sendMessage(Chatter.Message("/town plot info - Gets the info from the plot you are standing in"));
-		p.sendMessage(Chatter.Message("/town plot info [ID] - Gets the info from a plot"));
+		p.sendMessage(Chatter.Message("/town admin settings [ID]"));
+		p.sendMessage(Chatter.Message("/town admin remove [ID]"));
 	}
 	private void MayorHelp(Player p) {
 		p.sendMessage(Main.messageColor + "-----" + Main.tagColor + "[TownManager Help]" + Main.messageColor + "-----");
